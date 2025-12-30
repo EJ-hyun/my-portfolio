@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+:root {
+  --font-main: "Pretendard Variable", Arial, Helvetica, sans-serif;
+  --font-accent: "Racing Sans One", cursive;
+  --background-white: #f5f5f5;
+  --background-gray: #c6c6c6;
+  --background-ivory: #eae6e3;
+  --white: #ffffff;
+  --gray-10: #f5f5f5;
+  --gray-50: #f0f0f0;
+  --gray-800: #303030;
+  --black: #000000;
+  --gray-black: #343434;
+  --deep-gray: #5b5b5b;
+  --light-blue: #92a2f9;
+  --light-orange: #ffae4d;
+  --light-gray: #eae6e3;
+  --shadow-sm: 1px 1px 5px 0 #b7b7b7;
+  --shadow-md: 3px 3px 3px 0 #b7b7b7;
+}
+
+@theme inline {
+  --color-background-white: var(--background-white);
+  --color-background-gray: var(--background-gray);
+  --color-background-ivory: var(--background-ivory);
+  --color-white: var(--white);
+  --color-gray-10: var(--gray-10);
+  --color-gray-50: var(--gray-50);
+  --color-gray-800: var(--gray-800);
+  --color-black: var(--black);
+  --color-gray-black: var(--black);
+  --color-deep-gray: var(--gray-black);
+  --color-light-blue: var(--light-blue);
+  --color-light-orange: var(--light-orange);
+  --color-light-gray: var(--light-gray);
+  --font-family-pretendard: var(--font-main);
+  --font-family-accent: var(--font-accent);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --animate-arrow-up: arrow-up 2s ease-in-out infinite;
+  --animate-arrow-down: arrow-down 2s ease-in-out infinite;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-main);
+}
+
+button {
+  cursor: pointer;
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+}
+
+@keyframes starLoop {
+  0% {
+    transform: translateX(0%) rotateY(0deg);
+  }
+  100% {
+    transform: translateX(0%) rotateY(360deg);
+  }
+}
+
+.star-rotate {
+  transform-style: preserve-3d;
+  animation: starLoop 2.8s linear infinite;
+  backface-visibility: visible;
+  transform-origin: center center;
+}
+
+@keyframes arrow-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes arrow-down {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
