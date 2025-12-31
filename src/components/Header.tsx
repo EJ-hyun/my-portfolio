@@ -163,7 +163,7 @@ const Header = () => {
           }`}
           style={{ top: 0 }}
         >
-          <div className="flex flex-col items-center justify-center h-full gap-8">
+          <div className="flex flex-col items-center justify-center min-h-screen gap-8 bg-background-ivory">
             {menuItems.map(({ id, label }) => (
               <button
                 key={id}
