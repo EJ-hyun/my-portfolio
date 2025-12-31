@@ -108,7 +108,7 @@ function About() {
         start: "top 55%",
         end: "+=600",
         scrub: 1,
-        markers: true,
+        //markers: true,
       },
     });
 
@@ -153,7 +153,7 @@ function About() {
         start: "top 55%",
         end: "+=600",
         scrub: 1,
-        markers: true,
+        //markers: true,
       },
     });
 
@@ -198,7 +198,7 @@ function About() {
         start: "top 55%",
         end: "+=600",
         scrub: 1,
-        markers: true,
+        //markers: true,
       },
     });
 
@@ -243,7 +243,7 @@ function About() {
         start: "top 55%",
         end: "+=600",
         scrub: 1,
-        markers: true,
+        //markers: true,
       },
     });
 
