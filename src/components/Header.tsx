@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useSectionRefs } from "@/contexts/SectionRefsContext";
+import { HiMenuAlt3, HiX } from "react-icons/hi";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -11,6 +12,23 @@ const Header = () => {
   const { heroRef, aboutRef, projectsRef, contactRef } = useSectionRefs();
   const [activeSection, setActiveSection] = useState("home");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // ✅ ref 매핑 객체 (렌더링 외부에서 사용)
+  const sectionRefs = {
+    home: heroRef,
+    about: aboutRef,
+    projects: projectsRef,
+    contact: contactRef,
+  };
+
+  // ✅ menuItems에는 ref를 포함하지 않음
+  const menuItems = [
+    { id: "home", label: "Home" },
+    { id: "about", label: "About" },
+    { id: "projects", label: "Projects" },
+    { id: "contact", label: "Contact" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,10 +40,7 @@ const Header = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -68,14 +83,12 @@ const Header = () => {
       observer.observe(contactRef.current);
     }
 
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [heroRef, aboutRef, projectsRef, contactRef]);
 
-  const scrollToSection = (
-    ref: React.RefObject<HTMLElement | HTMLDivElement | null>
-  ) => {
+  // ✅ id를 받아서 해당하는 ref로 스크롤
+  const scrollToSection = (sectionId: string) => {
+    const ref = sectionRefs[sectionId as keyof typeof sectionRefs];
     if (!ref.current) return;
 
     gsap.to(window, {
@@ -86,14 +99,10 @@ const Header = () => {
       },
       ease: "power2.inOut",
     });
-  };
 
-  const menuItems = [
-    { id: "home", label: "Home", ref: heroRef },
-    { id: "about", label: "About", ref: aboutRef },
-    { id: "projects", label: "Projects", ref: projectsRef },
-    { id: "contact", label: "Contact", ref: contactRef },
-  ];
+    // 모바일 메뉴 닫기
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header
@@ -103,20 +112,22 @@ const Header = () => {
           : "bg-transparent"
       }`}
     >
-      <nav className="max-w-7xl mx-auto py-4">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
+          {/* 로고 */}
           <button
-            onClick={() => scrollToSection(heroRef)}
-            className="text-3xl font-accent text-gray-black"
+            onClick={() => scrollToSection("home")}
+            className="text-2xl sm:text-3xl font-accent text-gray-black z-50"
           >
             HEJ
           </button>
 
-          <ul className="flex items-center gap-8">
-            {menuItems.map(({ id, label, ref }) => (
+          {/* Desktop 메뉴 */}
+          <ul className="hidden lg:flex items-center gap-8">
+            {menuItems.map(({ id, label }) => (
               <li key={id}>
                 <button
-                  onClick={() => scrollToSection(ref)}
+                  onClick={() => scrollToSection(id)}
                   className={`relative text-lg font-medium transition-colors duration-300 ${
                     activeSection === id
                       ? "text-gray-black"
@@ -131,6 +142,42 @@ const Header = () => {
               </li>
             ))}
           </ul>
+
+          {/* Mobile 햄버거 버튼 */}
+          <button
+            className="lg:hidden z-50 text-gray-black"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <HiX className="w-8 h-8" />
+            ) : (
+              <HiMenuAlt3 className="w-8 h-8" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile 메뉴 */}
+        <div
+          className={`lg:hidden fixed inset-0 bg-background-ivory transition-transform duration-300 ${
+            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+          style={{ top: 0 }}
+        >
+          <div className="flex flex-col items-center justify-center h-full gap-8">
+            {menuItems.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => scrollToSection(id)}
+                className={`text-4xl font-accent transition-colors duration-300 ${
+                  activeSection === id
+                    ? "text-gray-black"
+                    : "text-gray-600 hover:text-gray-black"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
     </header>
