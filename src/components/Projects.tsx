@@ -13,7 +13,6 @@ function Projects() {
   const { projectsRef } = useSectionRefs();
   const visualWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Projects 데이터
   const projects: Project[] = [
     {
       id: 1,
@@ -147,51 +146,80 @@ function Projects() {
     },
   ];
 
-  // 프로젝트 가로 스크롤 애니메이션
   useEffect(() => {
     const visualWrapper = visualWrapperRef.current;
     const projectSection = projectsRef.current;
 
     if (!visualWrapper || !projectSection) return;
 
-    const setWrapperWidth = () => {
-      const wrapperWidth = projects.length * window.innerWidth;
-      visualWrapper.style.width = `${wrapperWidth}px`;
+    const mm = gsap.matchMedia();
 
-      // 초기 위치 설정
-      gsap.set(visualWrapper, { x: 0 });
+    mm.add("(min-width: 1280px)", () => {
+      const sections = visualWrapper.querySelectorAll("[data-project-item]");
 
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.vars.trigger === projectSection) {
-          trigger.kill();
-        }
+      sections.forEach((section) => {
+        (section as HTMLElement).style.width = `${window.innerWidth}px`;
       });
 
+      const totalWidth = sections.length * window.innerWidth;
+      visualWrapper.style.width = `${totalWidth}px`;
+
       gsap.to(visualWrapper, {
-        x: () => -(wrapperWidth - window.innerWidth),
+        x: () => -(totalWidth - window.innerWidth),
         ease: "none",
         scrollTrigger: {
           trigger: projectSection,
           start: "top top",
-          end: () => `+=${wrapperWidth - window.innerWidth}`,
+          end: () => `+=${totalWidth - window.innerWidth}`,
           scrub: 1,
           pin: true,
+          anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
+    });
 
-      ScrollTrigger.refresh();
-    };
+    mm.add("(max-width: 1279px)", () => {
+      visualWrapper.style.width = "auto";
+      visualWrapper.style.transform = "none";
+    });
 
-    setWrapperWidth();
-
-    // 리사이즈 핸들러
     let resizeTimer: NodeJS.Timeout;
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        setWrapperWidth();
-      }, 150);
+        mm.revert();
+
+        ScrollTrigger.refresh();
+
+        const sections = visualWrapper.querySelectorAll("[data-project-item]");
+
+        if (window.innerWidth >= 1280) {
+          sections.forEach((section) => {
+            (section as HTMLElement).style.width = `${window.innerWidth}px`;
+          });
+
+          const totalWidth = sections.length * window.innerWidth;
+          visualWrapper.style.width = `${totalWidth}px`;
+
+          gsap.to(visualWrapper, {
+            x: () => -(totalWidth - window.innerWidth),
+            ease: "none",
+            scrollTrigger: {
+              trigger: projectSection,
+              start: "top top",
+              end: () => `+=${totalWidth - window.innerWidth}`,
+              scrub: 1,
+              pin: true,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
+        } else {
+          visualWrapper.style.width = "auto";
+          visualWrapper.style.transform = "none";
+        }
+      }, 300);
     };
 
     window.addEventListener("resize", handleResize);
@@ -199,83 +227,77 @@ function Projects() {
     return () => {
       window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimer);
-
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.vars.trigger === projectSection) {
-          trigger.kill();
-        }
-      });
+      mm.revert();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, [projects.length, projectsRef]);
 
   return (
-    <section ref={projectsRef} className="relative overflow-hidden">
-      <div ref={visualWrapperRef} className="flex h-screen">
+    <section ref={projectsRef} className="relative">
+      <div ref={visualWrapperRef} className="xl:flex xl:h-screen">
         {projects.map((project, index) => (
           <div
             key={project.id}
-            className={`shrink-0 w-screen h-screen flex items-center justify-center ${project.bgColor}`}
-            style={{ width: "100vw" }}
+            data-project-item
+            className={`xl:shrink-0 xl:h-screen flex items-center justify-center ${project.bgColor} 
+              xl:w-screen min-h-screen xl:min-h-0 py-20 xl:py-0`}
           >
-            <div className="max-w-7xl mx-auto w-full">
-              <div className="grid grid-cols-12 gap-8 items-start">
-                {/* 프로젝트 정보 */}
-                <div className={`pt-5 col-span-5 ${project.textColor}`}>
-                  {/* 역할 */}
-                  <div className="flex items-center gap-4 mb-8">
+            <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 xl:px-8">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+                <div className={`xl:pt-5 xl:col-span-5 ${project.textColor}`}>
+                  <div className="flex items-center gap-4 mb-6 xl:mb-8">
                     <span className="text-sm font-medium opacity-60">
                       {project.role}
                     </span>
                     <div className="h-px flex-1 bg-current opacity-20"></div>
                   </div>
+
                   <div className="mb-4">
-                    <span className="text-7xl font-accent">
+                    <span className="text-4xl sm:text-5xl xl:text-7xl font-accent">
                       PROJECT {project.number}
                     </span>
                   </div>
 
-                  {/* 타이틀 */}
                   <div className="mb-6">
-                    <h2 className="text-5xl font-bold">{project.title}</h2>
-                    {/* <h3 className="mt-2 text-xl text-gray-500">
-                      {project.subtitle}
-                    </h3> */}
+                    <h2 className="text-3xl sm:text-4xl xl:text-5xl font-bold">
+                      {project.title}
+                    </h2>
                   </div>
 
-                  {/* 설명 */}
-                  <p className="text-lg mb-5 break-keep">
+                  <p className="text-base sm:text-lg mb-4 xl:mb-5 break-keep">
                     {project.description}
                   </p>
 
-                  {/* 기간 */}
                   {project.period && (
-                    <p className="text-base mb-1">- {project.period}</p>
+                    <p className="text-sm sm:text-base mb-1">
+                      - {project.period}
+                    </p>
                   )}
 
-                  {/* 기여도 */}
                   {project.contribute && (
-                    <p className="text-base mb-1">- {project.contribute}</p>
+                    <p className="text-sm sm:text-base mb-1">
+                      - {project.contribute}
+                    </p>
                   )}
 
-                  {/* 배포 */}
                   {project.deploy && (
-                    <p className="text-sm mb-3">* {project.deploy}</p>
+                    <p className="text-xs sm:text-sm mb-1">
+                      * {project.deploy}
+                    </p>
                   )}
 
-                  {/* 태그 */}
-                  <div className="flex flex-wrap gap-2 mb-8">
+                  <div className="flex flex-wrap gap-2 pt-2 mb-6 xl:mb-8">
                     {project.tags.map((tag, i) => (
                       <span
                         key={i}
-                        className="px-2 py-1 border-gray-600 border-[1px] text-sm rounded-2xl"
+                        className="px-2 py-1 border-gray-600 border text-xs sm:text-sm rounded-2xl"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
 
-                  {/* 버튼들 */}
-                  <div className="flex gap-4 items-center">
+                  <div className="flex flex-col sm:flex-row gap-3 xl:gap-4">
                     <a
                       href={project.link || "#"}
                       target={project.link ? "_blank" : "_self"}
@@ -286,7 +308,7 @@ function Projects() {
                           alert("프로젝트 상세 페이지 준비중입니다.");
                         }
                       }}
-                      className={`px-5 py-3 text-base rounded-md ${
+                      className={`px-5 py-3 text-center text-sm xl:text-base rounded-md ${
                         project.textColor === "text-white"
                           ? "bg-white text-gray-black hover:bg-gray-100"
                           : "bg-[#FFAF50] text-white hover:bg-[#e18c26]"
@@ -294,15 +316,14 @@ function Projects() {
                     >
                       View Detail
                     </a>
-
                     {project.github && (
                       <a
                         href={project.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`px-5 py-3 text-base rounded-md ${
+                        className={`px-5 py-3 text-center text-sm xl:text-base rounded-md ${
                           project.textColor === "text-white"
-                            ? "border-white text-white hover:bg-white hover:text-gray-black"
+                            ? "border-white text-white hover:bg-white hover:text-gray-black border-2"
                             : "bg-gray-400 text-white hover:bg-gray-500"
                         } transition-colors duration-300 inline-block`}
                       >
@@ -312,14 +333,15 @@ function Projects() {
                   </div>
                 </div>
 
-                {/* 오른쪽: 이미지들 */}
-                <div className="col-span-7">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className={`xl:col-span-7 order-1 xl:order-2`}>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:gap-4">
                     {project.images.map((img, i) => (
                       <div
                         key={i}
                         className={`relative overflow-hidden ${
-                          i === 0 ? "col-span-2 h-80" : "h-64"
+                          i === 0
+                            ? "col-span-2 h-40 sm:h-56 xl:h-80"
+                            : "h-28 sm:h-40 xl:h-64"
                         }`}
                       >
                         <Image
@@ -332,9 +354,8 @@ function Projects() {
                     ))}
                   </div>
 
-                  {/* 프로젝트 인덱스 */}
                   <div
-                    className={`text-right mt-6 ${project.textColor} opacity-40`}
+                    className={`text-center xl:text-right mt-6 ${project.textColor} opacity-40`}
                   >
                     <span className="text-sm">
                       {String(index + 1).padStart(2, "0")} /{" "}
@@ -350,4 +371,5 @@ function Projects() {
     </section>
   );
 }
+
 export default Projects;

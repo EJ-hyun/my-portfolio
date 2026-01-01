@@ -14,7 +14,6 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // ✅ ref 매핑 객체 (렌더링 외부에서 사용)
   const sectionRefs = {
     home: heroRef,
     about: aboutRef,
@@ -22,13 +21,25 @@ const Header = () => {
     contact: contactRef,
   };
 
-  // ✅ menuItems에는 ref를 포함하지 않음
+  // menuItems에는 ref를 포함하지 않음
   const menuItems = [
     { id: "home", label: "Home" },
     { id: "about", label: "About" },
     { id: "projects", label: "Projects" },
     { id: "contact", label: "Contact" },
   ];
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,7 +97,7 @@ const Header = () => {
     return () => observer.disconnect();
   }, [heroRef, aboutRef, projectsRef, contactRef]);
 
-  // ✅ id를 받아서 해당하는 ref로 스크롤
+  // id를 받아서 해당하는 ref로 스크롤
   const scrollToSection = (sectionId: string) => {
     const ref = sectionRefs[sectionId as keyof typeof sectionRefs];
     if (!ref.current) return;
@@ -100,7 +111,6 @@ const Header = () => {
       ease: "power2.inOut",
     });
 
-    // 모바일 메뉴 닫기
     setIsMobileMenuOpen(false);
   };
 
@@ -147,6 +157,7 @@ const Header = () => {
           <button
             className="lg:hidden z-50 text-gray-black"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? (
               <HiX className="w-8 h-8" />
@@ -171,7 +182,7 @@ const Header = () => {
                 className={`text-4xl font-accent transition-colors duration-300 ${
                   activeSection === id
                     ? "text-gray-black"
-                    : "text-gray-600 hover:text-gray-black"
+                    : "text-gray-400 hover:text-gray-black"
                 }`}
               >
                 {label}

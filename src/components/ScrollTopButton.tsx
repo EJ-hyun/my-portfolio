@@ -76,7 +76,7 @@ function ScrollTopButton({
           finalIsVisible
             ? "translate-y-0 opacity-100"
             : "translate-y-16 opacity-0 pointer-events-none",
-          isMobile ? "right-[20px]" : "right-[50px]",
+          isMobile ? "right-4" : "right-[50px]",
           className
         )}
         style={{ bottom: `${bottomPosition}px` }}

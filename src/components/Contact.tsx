@@ -43,7 +43,8 @@ function Contact() {
           scrub: 1,
           pin: true,
           anticipatePin: 1,
-          // markers: true,
+          pinSpacing: true,
+          id: "contact-animation",
         },
       });
 
@@ -73,17 +74,26 @@ function Contact() {
         }
       });
     }
-  });
+
+    return () => {
+      ScrollTrigger.getAll().forEach((st) => {
+        if (st.vars.id === "contact-animation") {
+          st.kill();
+        }
+      });
+    };
+  }, [contactRef]);
+
   return (
     <section
       ref={contactRef}
-      className="min-h-screen flex items-center justify-center bg-background-ivory py-32"
+      className="min-h-screen flex items-center justify-center bg-background-ivory py-25 xl:py-32"
     >
-      <div className="max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-2 gap-16 items-center">
-          <div className="relative h-[600px] flex items-center justify-center">
-            <div className="relative w-[400px] h-[400px]">
-              {/* 단계 1: 기초 */}
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 xl:px-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 xl:gap-16 items-center">
+          {/* 집 애니메이션 */}
+          <div className="relative h-[300px] xl:h-[600px] flex items-center justify-center order-2 xl:order-1">
+            <div className="relative w-[300px] h-[300px] xl:w-[400px] xl:h-[400px]">
               <div
                 ref={houseStep1Ref}
                 className="absolute inset-0 flex items-center justify-center"
@@ -97,7 +107,6 @@ function Contact() {
                 />
               </div>
 
-              {/* 단계 2: 1층 구조 */}
               <div
                 ref={houseStep2Ref}
                 className="absolute inset-0 flex items-center justify-center"
@@ -111,7 +120,6 @@ function Contact() {
                 />
               </div>
 
-              {/* 단계 3: 2층 구조 */}
               <div
                 ref={houseStep3Ref}
                 className="absolute inset-0 flex items-center justify-center"
@@ -125,7 +133,6 @@ function Contact() {
                 />
               </div>
 
-              {/* 단계 4: 벽 구조 */}
               <div
                 ref={houseStep4Ref}
                 className="absolute inset-0 flex items-center justify-center"
@@ -139,7 +146,6 @@ function Contact() {
                 />
               </div>
 
-              {/* 단계 5: 지붕 골조 */}
               <div
                 ref={houseStep5Ref}
                 className="absolute inset-0 flex items-center justify-center"
@@ -153,7 +159,6 @@ function Contact() {
                 />
               </div>
 
-              {/* 단계 6: 완성된 집 */}
               <div
                 ref={houseStep6Ref}
                 className="absolute inset-0 flex items-center justify-center"
@@ -170,34 +175,33 @@ function Contact() {
           </div>
 
           {/* Contact 정보 */}
-          <div className="text-left">
-            <h2 className="text-7xl font-accent mb-5">
+          <div className="text-left order-1 xl:order-2">
+            <h2 className="text-4xl sm:text-5xl xl:text-7xl font-accent mb-5">
               I'd like to work with you
             </h2>
 
-            <p className="text-lg text-gray-600 mb-10">
+            <p className="text-base sm:text-lg text-gray-600 mb-8 xl:mb-10">
               함께 오래 머물고 싶은
               <br />
-              ‘집 같은 서비스’를 만들어가고 싶습니다.
+              '집 같은 서비스'를 만들어가고 싶습니다.
             </p>
 
-            {/* 연락처 정보 */}
             <div className="space-y-4">
-              <span className="inline-block px-3 py-1 mb-1 text-lg bg-[#FFAF50] text-white rounded-xl">
+              <span className="inline-block px-3 py-1 mb-1 text-base xl:text-lg bg-[#FFAF50] text-white rounded-xl">
                 Email
               </span>
               <a
                 href="mailto:ejdeveloper0305@gmail.com"
-                className="flex items-center gap-3 text-lg hover:text-gray-600 transition-colors"
+                className="flex items-center gap-3 text-base xl:text-lg hover:text-gray-600 transition-colors"
               >
                 <span>ejdeveloper0305@gmail.com</span>
               </a>
-              <span className="inline-block px-3 py-1 mb-1 text-lg bg-[#FFAF50] text-white rounded-xl">
+              <span className="inline-block px-3 py-1 mb-1 text-base xl:text-lg bg-[#FFAF50] text-white rounded-xl">
                 Tel
               </span>
               <a
-                href="tel:+82-10-1234-5678"
-                className="flex items-center gap-3 text-lg hover:text-gray-600 transition-colors"
+                href="tel:+82-10-9543-1819"
+                className="flex items-center gap-3 text-base xl:text-lg hover:text-gray-600 transition-colors"
               >
                 <span>010-9543-1819</span>
               </a>
@@ -208,4 +212,5 @@ function Contact() {
     </section>
   );
 }
+
 export default Contact;
