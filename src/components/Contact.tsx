@@ -18,6 +18,9 @@ function Contact() {
   const houseStep5Ref = useRef<HTMLDivElement>(null);
   const houseStep6Ref = useRef<HTMLDivElement>(null);
 
+  const scrollTriggerInstanceRef = useRef<ScrollTrigger | null>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+
   useEffect(() => {
     const contactSection = contactRef.current;
     const houseSteps = [
@@ -29,24 +32,32 @@ function Contact() {
       houseStep6Ref.current,
     ];
 
-    if (contactSection && houseSteps.every((step) => step !== null)) {
+    if (!contactSection || !houseSteps.every((step) => step !== null)) return;
+
+    const cleanup = () => {
+      if (timelineRef.current) {
+        timelineRef.current.kill();
+        timelineRef.current = null;
+      }
+      if (scrollTriggerInstanceRef.current) {
+        scrollTriggerInstanceRef.current.kill();
+        scrollTriggerInstanceRef.current = null;
+      }
+    };
+
+    const setupAnimation = () => {
+      cleanup();
+
       gsap.set(houseSteps, {
         y: -200,
         opacity: 0,
       });
 
       const houseTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: contactSection,
-          start: "top top",
-          end: "+=2000",
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-          pinSpacing: true,
-          id: "contact-animation",
-        },
+        paused: true,
       });
+
+      timelineRef.current = houseTl;
 
       houseSteps.forEach((step, index) => {
         const position = index * 0.6;
@@ -73,14 +84,49 @@ function Contact() {
           );
         }
       });
-    }
+
+      scrollTriggerInstanceRef.current = ScrollTrigger.create({
+        trigger: contactSection,
+        start: "top top",
+        end: "+=2000",
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        pinSpacing: true,
+        id: "contact-animation",
+        animation: houseTl,
+        invalidateOnRefresh: true,
+      });
+    };
+
+    setupAnimation();
+
+    let resizeTimer: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        setupAnimation();
+        ScrollTrigger.refresh();
+      }, 150);
+    };
+
+    // Visibility change
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 100);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      ScrollTrigger.getAll().forEach((st) => {
-        if (st.vars.id === "contact-animation") {
-          st.kill();
-        }
-      });
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      cleanup();
     };
   }, [contactRef]);
 

@@ -12,6 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 function Projects() {
   const { projectsRef } = useSectionRefs();
   const visualWrapperRef = useRef<HTMLDivElement>(null);
+  const scrollTriggerInstanceRef = useRef<ScrollTrigger | null>(null);
 
   const projects: Project[] = [
     {
@@ -152,22 +153,30 @@ function Projects() {
 
     if (!visualWrapper || !projectSection) return;
 
-    const mm = gsap.matchMedia();
+    const killScrollTrigger = () => {
+      if (scrollTriggerInstanceRef.current) {
+        scrollTriggerInstanceRef.current.kill();
+        scrollTriggerInstanceRef.current = null;
+      }
+    };
 
-    mm.add("(min-width: 1280px)", () => {
+    // 데스크톱 가로 스크롤 설정
+    const setupHorizontalScroll = () => {
+      killScrollTrigger();
+
       const sections = visualWrapper.querySelectorAll("[data-project-item]");
+      const isDesktop = window.innerWidth >= 1280;
 
-      sections.forEach((section) => {
-        (section as HTMLElement).style.width = `${window.innerWidth}px`;
-      });
+      if (isDesktop) {
+        // Width 설정
+        sections.forEach((section) => {
+          (section as HTMLElement).style.width = `${window.innerWidth}px`;
+        });
 
-      const totalWidth = sections.length * window.innerWidth;
-      visualWrapper.style.width = `${totalWidth}px`;
+        const totalWidth = sections.length * window.innerWidth;
+        visualWrapper.style.width = `${totalWidth}px`;
 
-      gsap.to(visualWrapper, {
-        x: () => -(totalWidth - window.innerWidth),
-        ease: "none",
-        scrollTrigger: {
+        scrollTriggerInstanceRef.current = ScrollTrigger.create({
           trigger: projectSection,
           start: "top top",
           end: () => `+=${totalWidth - window.innerWidth}`,
@@ -175,62 +184,49 @@ function Projects() {
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-        },
-      });
-    });
+          animation: gsap.to(visualWrapper, {
+            x: () => -(totalWidth - window.innerWidth),
+            ease: "none",
+          }),
+        });
+      } else {
+        visualWrapper.style.width = "auto";
+        visualWrapper.style.transform = "none";
+        sections.forEach((section) => {
+          (section as HTMLElement).style.width = "auto";
+        });
+      }
+    };
 
-    mm.add("(max-width: 1279px)", () => {
-      visualWrapper.style.width = "auto";
-      visualWrapper.style.transform = "none";
-    });
+    setupHorizontalScroll();
 
     let resizeTimer: NodeJS.Timeout;
     const handleResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        mm.revert();
+        setupHorizontalScroll();
+      }, 150);
+    };
 
-        ScrollTrigger.refresh();
-
-        const sections = visualWrapper.querySelectorAll("[data-project-item]");
-
-        if (window.innerWidth >= 1280) {
-          sections.forEach((section) => {
-            (section as HTMLElement).style.width = `${window.innerWidth}px`;
-          });
-
-          const totalWidth = sections.length * window.innerWidth;
-          visualWrapper.style.width = `${totalWidth}px`;
-
-          gsap.to(visualWrapper, {
-            x: () => -(totalWidth - window.innerWidth),
-            ease: "none",
-            scrollTrigger: {
-              trigger: projectSection,
-              start: "top top",
-              end: () => `+=${totalWidth - window.innerWidth}`,
-              scrub: 1,
-              pin: true,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-            },
-          });
-        } else {
-          visualWrapper.style.width = "auto";
-          visualWrapper.style.transform = "none";
-        }
-      }, 300);
+    // Visibility change 핸들러
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 100);
+      }
     };
 
     window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimer);
-      mm.revert();
-      ScrollTrigger.getAll().forEach((st) => st.kill());
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      killScrollTrigger();
     };
-  }, [projects.length, projectsRef]);
+  }, [projectsRef]);
 
   return (
     <section ref={projectsRef} className="relative">
